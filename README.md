@@ -11,16 +11,17 @@ There are 3777 images in total in the train dataset. Almost half of the images b
 
 Store the [train dataset](https://www.kaggle.com/c/the-nature-conservancy-fisheries-monitoring/data) in directory 'Data/train'.
 
-Run 'data_augmentation.py' to resize the original image to 256(width) x 144(height), and for every resized image (except for the ones in ALB subfolder), randomly generated severy augmented images by changing its hue, contrast, saturation, brightness and so on. 
+Run '[data_augmentation.py](https://github.com/jundongq/Nature-Conservancy-Fisheries-Monitoring/blob/master/data_augmentation.py)' to resize the original image to 256(width) x 144(height), and for every resized image (except for the ones in ALB subfolder), randomly generated severy augmented images by changing its hue, contrast, saturation, brightness and so on. 
 
 Save all resized and augmented images into directory 'Data/train_aug_256_144/'. There are 14,993 images after data augmentation
 
 ### 3. Data preprocessing
 
-Run 'pre_processing.py', to store the [preprocessed data](https://drive.google.com/open?id=0B2ifRtIZ8FKkOXN4aHZ6MkpGRGM) in h5 format. Every preprocessed image is in format of 144(height) x 256(width) x 3(channel). The corresponding label of each image is also included in the preprocessed data.
+Run '[pre_processing.py](https://github.com/jundongq/Nature-Conservancy-Fisheries-Monitoring/blob/master/pre_processing.py)', to store the [preprocessed data](https://drive.google.com/open?id=0B2ifRtIZ8FKkOXN4aHZ6MkpGRGM) in h5 format. Every preprocessed image is in format of 144(height) x 256(width) x 3(channel). The corresponding label of each image is also included in the preprocessed data.
 
 ### 4. Bottleneck features
 
+Run [Transferlearning.py](https://github.com/jundongq/Nature-Conservancy-Fisheries-Monitoring/blob/master/TransferLearning.py)
 
 Frist of all, use VGG16's convolutional layers to precompute the features of the images. 
 Use [preprocessed data](https://drive.google.com/open?id=0B2ifRtIZ8FKkOXN4aHZ6MkpGRGM) as input, firstly, random permute the preprocessed data and split the it into train, validation, and test dataset. For the three sub datasets, the computed bottleneck features are available as: 
