@@ -254,11 +254,7 @@ else:
 	print 'Computing bottleneck features for train and validation dataset...'
 	save_bottleneck_features('train', train_size, train_idx)
 	save_bottleneck_features('validation', val_size, val_idx)
-	'''
-	checkpointer = ModelCheckpoint(top_model_weights_path, verbose=1, save_best_only=True)
-	history = model.fit(train_data, train_labels, epochs=epochs, batch_size=batch_size,
-					validation_data = (validation_data, validation_labels), callbacks=[checkpointer])
-	'''
+
 	run()
 	
 
