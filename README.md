@@ -13,18 +13,22 @@ Store the [train dataset](https://www.kaggle.com/c/the-nature-conservancy-fisher
 
 Run 'data_augmentation.py' to resize the original image to 256(width) x 144(height), and for every resized image (except for the ones in ALB subfolder), randomly generated severy augmented images by changing its hue, contrast, saturation, brightness and so on. 
 
-Save all resized and augmented images into directory 'Data/train_aug_256_144/'.
+Save all resized and augmented images into directory 'Data/train_aug_256_144/'. There are 14,993 images after data augmentation
 
 ### 3. Data preprocessing
 
-Run 'pre_processing.py', to store the [preprocessed data](https://drive.google.com/open?id=0B2ifRtIZ8FKkOXN4aHZ6MkpGRGM) in h5 format. Every preprocessed image is in format of 144(height) x 256(width) x 3(channel).
+Run 'pre_processing.py', to store the [preprocessed data](https://drive.google.com/open?id=0B2ifRtIZ8FKkOXN4aHZ6MkpGRGM) in h5 format. Every preprocessed image is in format of 144(height) x 256(width) x 3(channel). The corresponding label of each image is also included in the preprocessed data.
 
 ### 4. Bottleneck features
 
-Use VGG16's convolutional layers to precompute the features of the images. Use [preprocessed data](https://drive.google.com/open?id=0B2ifRtIZ8FKkOXN4aHZ6MkpGRGM) as input, firstly, random permute the preprocessed data and split the it into train, validation, and test dataset. For the three sub datasets, the computed bottleneck features are available as: 
+
+Frist of all, use VGG16's convolutional layers to precompute the features of the images. 
+Use [preprocessed data](https://drive.google.com/open?id=0B2ifRtIZ8FKkOXN4aHZ6MkpGRGM) as input, firstly, random permute the preprocessed data and split the it into train, validation, and test dataset. For the three sub datasets, the computed bottleneck features are available as: 
 
 (1) [bottleneck_features_256_144_train.npy](https://drive.google.com/open?id=0B2ifRtIZ8FKkRlpZWFh5akhwSDQ); 
 
 (2) [bottleneck_features_256_144_validation.npy](https://drive.google.com/open?id=0B2ifRtIZ8FKkakZReDBhU2JNMGM);
 
 (3) [bottleneck_features_256_144_test.npy](https://drive.google.com/open?id=0B2ifRtIZ8FKkVEVhaGd5VVU1M3M).
+
+Second, build a model on top of the VGG16 convolutional layers, use the 'bottleneck_features_256_144_train.npy' and 'bottleneck_features_256_144_validation.npy' to train and validate the the model. Useing F1 score as the metric to measure the model performance.
