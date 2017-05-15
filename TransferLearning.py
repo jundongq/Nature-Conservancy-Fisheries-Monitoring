@@ -159,7 +159,7 @@ def Grid_Search_Training(model):
     f1_scorer = make_scorer(f1_score, average='weighted')
     optimizers = ['sgd', 'rmsprop', 'adam']
     init = ['glorot_uniform', 'glorot_normal', 'uniform']
-    epochs = [10, 20, 30]
+    epochs = [1, 20, 30]
     batches = [32, 64, 128]
     param_grid = dict(optimizer=optimizers, epochs=epochs, batch_size = batches, init = init)
     grid = GridSearchCV(estimator=model, param_grid=param_grid, cv=4, scoring=f1_scorer)
@@ -173,12 +173,12 @@ def load_train_val_data():
     """Load train and validation bottleneck features
     """
     train_data   = np.load(open('bottleneck_features_256_144_train.npy'))
-    # train_labels = to_categorical(y[train_idx])
-    train_labels = y[train_idx]
+    train_labels = to_categorical(y[train_idx])
+    # train_labels = y[train_idx]
 
     validation_data   = np.load(open('bottleneck_features_256_144_validation.npy'))
-    # validation_labels = to_categorical(y[val_idx])
-    validation_labels = y[val_idx]
+    validation_labels = to_categorical(y[val_idx])
+    # validation_labels = y[val_idx]
     return train_data, train_labels, validation_data, validation_labels
 
 def load_test_data():
