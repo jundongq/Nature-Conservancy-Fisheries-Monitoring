@@ -223,11 +223,6 @@ else:
 	print 'Computing bottleneck features for train and validation dataset...'
 	save_bottleneck_features('train', train_size, train_idx)
 	save_bottleneck_features('validation', val_size, val_idx)
-	'''
-	checkpointer = ModelCheckpoint(top_model_weights_path, verbose=1, save_best_only=True)
-	history = model.fit(train_data, train_labels, epochs=epochs, batch_size=batch_size,
-					validation_data = (validation_data, validation_labels), callbacks=[checkpointer])
-	'''
 	run()
 	
 
@@ -263,20 +258,3 @@ labels = ['ALB(0)', 'BET(1)', 'DOL(2)', 'LAG(3)', 'NoF(4)', 'OTHER(5)', 'SHARK(6
 print classification_report(y_test, y_pred, target_names=labels)
 print confusion_matrix(y_test, y_pred)
 
-# summarize history for accuracy 
-plt.plot(history.history['acc'])
-plt.plot(history.history['val_acc'])
-plt.title('model accuracy')
-plt.ylabel('accuracy')
-plt.xlabel('epoch')
-plt.legend(['train', 'val'], loc='upper left')
-plt.show()
-
-# summarize history for loss
-plt.plot(history.history['loss'])
-plt.plot(history.history['val_loss'])
-plt.title('Model loss')
-plt.ylabel('loss')
-plt.xlabel('epoch')
-plt.legend(['train', 'val'], loc='upper left')
-plt.show()
