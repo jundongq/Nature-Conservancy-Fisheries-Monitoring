@@ -15,4 +15,8 @@ Run 'data_augmentation.py' to resize the original image to 256(width) x 144(heig
 
 ### 3. Data preprocessing
 
-Run 'pre_processing.py', to store the preprocessed data in h5 format.
+Run 'pre_processing.py', to store the [preprocessed data](https://drive.google.com/open?id=0B2ifRtIZ8FKkOXN4aHZ6MkpGRGM) in h5 format. Every preprocessed image is in format of 144(height) x 256(width) x 3(channel).
+
+### 4. Bottleneck features
+
+Use VGG16's convolutional layers to precompute the features of the images. Use [preprocessed data](https://drive.google.com/open?id=0B2ifRtIZ8FKkOXN4aHZ6MkpGRGM) as input, firstly, random permute the preprocessed data and split the it into train, validation, and test dataset. For the three sub datasets, the computed bottleneck features are available as: (1) [bottleneck_features_256_144_train.npy](https://drive.google.com/open?id=0B2ifRtIZ8FKkRlpZWFh5akhwSDQ); (2) [bottleneck_features_256_144_validation.npy](https://drive.google.com/open?id=0B2ifRtIZ8FKkakZReDBhU2JNMGM) and (3) [bottleneck_features_256_144_test.npy](https://drive.google.com/open?id=0B2ifRtIZ8FKkVEVhaGd5VVU1M3M).
