@@ -2,7 +2,8 @@ This folder is to store preprocessed data.
 
 The preprocessed data is in h5 format, which can be downloaded through this link [Preprocessed_Aug_Dataset_256_144.h5](https://drive.google.com/open?id=0B2ifRtIZ8FKkOXN4aHZ6MkpGRGM)
 
-Using convolutional layers of VGG16 to compute bottleneck features:
+
+Using convolutional layers of VGG16 to compute bottleneck features, the output format is 9(height) x 16(width) x512(#filters).
 
 (1) [bottleneck_features_256_144_train.npy](https://drive.google.com/open?id=0B2ifRtIZ8FKkRlpZWFh5akhwSDQ); 
 
