@@ -55,6 +55,7 @@ train_idx = perm[-train_size:]
 
 def pop(self):
     '''Removes a layer instance on top of the layer stack.
+    Credit: joelthchao, https://github.com/fchollet/keras/issues/2371
     '''
     if not self.outputs:
         raise Exception('Sequential model cannot be popped: model is empty.')
