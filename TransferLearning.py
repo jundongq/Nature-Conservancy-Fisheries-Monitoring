@@ -109,64 +109,26 @@ def save_bottleneck_features(data, data_size, data_idx):
 	t1 = time.time()
 	print 'Computing %s bottleneck features took %.2f mins.' %(data, round((t1-t0)/60., 2))
 
-def precision(y_true, y_pred):
-    """Precision metric.
-    Only computes a batch-wise average of precision.
-    Computes the precision, a metric for multi-label classification of
-    how many selected items are relevant.
+# define a f1 score metric
+def fmeasure(y_true, y_pred):
+    """According to the keras version 1.2.0 metrics source code, a custom f1 score metric
+    is built here. The link for source code:
+    https://github.com/fchollet/keras/blob/53e541f7bf55de036f4f5641bd2947b96dd8c4c3/keras/metrics.py
     """
     true_positives = K.sum(K.round(K.clip(y_true * y_pred, 0, 1)))
     predicted_positives = K.sum(K.round(K.clip(y_pred, 0, 1)))
-    precision = true_positives / (predicted_positives + K.epsilon())
-    return precision
-
-
-def recall(y_true, y_pred):
-    """Recall metric.
-    Only computes a batch-wise average of recall.
-    Computes the recall, a metric for multi-label classification of
-    how many relevant items are selected.
-    """
-    true_positives = K.sum(K.round(K.clip(y_true * y_pred, 0, 1)))
-    possible_positives = K.sum(K.round(K.clip(y_true, 0, 1)))
-    recall = true_positives / (possible_positives + K.epsilon())
-    return recall
-
-def fbeta_score(y_true, y_pred, beta=1):
-    """Computes the F score.
-    The F score is the weighted harmonic mean of precision and recall.
-    Here it is only computed as a batch-wise average, not globally.
-    This is useful for multi-label classification, where input samples can be
-    classified as sets of labels. By only using accuracy (precision) a model
-    would achieve a perfect score by simply assigning every class to every
-    input. In order to avoid this, a metric should penalize incorrect class
-    assignments as well (recall). The F-beta score (ranged from 0.0 to 1.0)
-    computes this, as a weighted mean of the proportion of correct class
-    assignments vs. the proportion of incorrect class assignments.
-    With beta = 1, this is equivalent to a F-measure. With beta < 1, assigning
-    correct classes becomes more important, and with beta > 1 the metric is
-    instead weighted towards penalizing incorrect class assignments.
-    """
-    if beta < 0:
-        raise ValueError('The lowest choosable beta is zero (only precision).')
-
-    # If there are no true positives, fix the F score at 0 like sklearn.
-    if K.sum(K.round(K.clip(y_true, 0, 1))) == 0:
-        return 0
-
-    p = precision(y_true, y_pred)
-    r = recall(y_true, y_pred)
-    bb = beta ** 2
-    fbeta_score = (1 + bb) * (p * r) / (bb * p + r + K.epsilon())
-    return fbeta_score
-
-
-def fmeasure(y_true, y_pred):
-    """Computes the f-measure, the harmonic mean of precision and recall.
-    Here it is only computed as a batch-wise average, not globally.
-    """
-    return fbeta_score(y_true, y_pred, beta=1)
+    possible_positives  = K.sum(K.round(K.clip(y_true, 0, 1)))
+    # K.epsilon = 1e-7
+    p = true_positives / (predicted_positives + K.epsilon())
+    r = true_positives / (possible_positives + K.epsilon())
     
+    beta = 1 # f1 measure
+    bb   = beta**2
+    fbeta_score = (1 + bb) * (p * r) / (bb * p + r + K.epsilon())
+    
+    return fbeta_score
+    
+
 # define a function to train the layers on top of the bottleneck features
 def Top_FCN_Model(optimizer='sgd', init='glorot_uniform'):
 
@@ -191,23 +153,25 @@ def Top_FCN_Model(optimizer='sgd', init='glorot_uniform'):
 	model.compile(loss='categorical_crossentropy', optimizer=optimizer, metrics=[fmeasure])
 	return model
 
-
+# define a grid search function that take model object as input
 def Grid_Search_Training(model):
     
     f1_scorer = make_scorer(f1_score, average='weighted')
     optimizers = ['sgd', 'rmsprop', 'adam']
     init = ['glorot_uniform', 'glorot_normal', 'uniform']
-    epochs = [10, 20, 30]
+    epochs = [1, 20, 30]
     batches = [32, 64, 128]
     param_grid = dict(optimizer=optimizers, epochs=epochs, batch_size = batches, init = init)
     grid = GridSearchCV(estimator=model, param_grid=param_grid, cv=4, scoring=f1_scorer)
     
     return grid
 
-
+# assign a name for the h5 file that stores model weights
 top_model_weights_path = 'Top_FCN_Model_weights.h5'
 
 def load_train_val_data():
+    """Load train and validation bottleneck features
+    """
     train_data   = np.load(open('bottleneck_features_256_144_train.npy'))
     # train_labels = to_categorical(y[train_idx])
     train_labels = y[train_idx]
@@ -218,15 +182,19 @@ def load_train_val_data():
     return train_data, train_labels, validation_data, validation_labels
 
 def load_test_data():
+    """Load test bottleneck features
+    """
     test_data = np.load(open('bottleneck_features_256_144_test.npy'))
     return test_data
 
 def run():
+    """This funtion loads train and validation data, and starts training process.
+    """
 	train_data, train_labels, validation_data, validation_labels = load_train_val_data()
 	X = np.concatenate((train_data, validation_data), axis=0)
 	y = np.concatenate((train_labels, validation_labels), axis=0)
-	print np.shape(X)
-	print np.shape(y)
+	# print np.shape(X)
+	# print np.shape(y)
 	print 'Loaded train and validation data!'
 
 	# create a model
@@ -245,6 +213,7 @@ def run():
 	# checkpointer = ModelCheckpoint(top_model_weights_path, verbose=1, save_best_only=True)
 	grid_result = grid.fit(X, y)
 	print("Best: %f using %s" % (grid_result.best_score_, grid_result.best_params_))
+
 	
 if os.path.isfile('bottleneck_features_256_144_train.npy') and os.path.isfile('bottleneck_features_256_144_validation.npy'):
 	print 'Bottleneck features for training and validation datasets exist!'
@@ -254,7 +223,11 @@ else:
 	print 'Computing bottleneck features for train and validation dataset...'
 	save_bottleneck_features('train', train_size, train_idx)
 	save_bottleneck_features('validation', val_size, val_idx)
-
+	'''
+	checkpointer = ModelCheckpoint(top_model_weights_path, verbose=1, save_best_only=True)
+	history = model.fit(train_data, train_labels, epochs=epochs, batch_size=batch_size,
+					validation_data = (validation_data, validation_labels), callbacks=[checkpointer])
+	'''
 	run()
 	
 
@@ -290,20 +263,3 @@ labels = ['ALB(0)', 'BET(1)', 'DOL(2)', 'LAG(3)', 'NoF(4)', 'OTHER(5)', 'SHARK(6
 print classification_report(y_test, y_pred, target_names=labels)
 print confusion_matrix(y_test, y_pred)
 
-# summarize history for accuracy 
-plt.plot(history.history['acc'])
-plt.plot(history.history['val_acc'])
-plt.title('model accuracy')
-plt.ylabel('accuracy')
-plt.xlabel('epoch')
-plt.legend(['train', 'val'], loc='upper left')
-plt.show()
-
-# summarize history for loss
-plt.plot(history.history['loss'])
-plt.plot(history.history['val_loss'])
-plt.title('Model loss')
-plt.ylabel('loss')
-plt.xlabel('epoch')
-plt.legend(['train', 'val'], loc='upper left')
-plt.show()
