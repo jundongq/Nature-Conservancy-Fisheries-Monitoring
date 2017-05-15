@@ -159,7 +159,7 @@ def Grid_Search_Training(model):
     f1_scorer = make_scorer(f1_score, average='weighted')
     optimizers = ['sgd', 'rmsprop', 'adam']
     init = ['glorot_uniform', 'glorot_normal', 'uniform']
-    epochs = [1, 20, 30]
+    epochs = [10, 20, 30]
     batches = [32, 64, 128]
     param_grid = dict(optimizer=optimizers, epochs=epochs, batch_size = batches, init = init)
     grid = GridSearchCV(estimator=model, param_grid=param_grid, cv=4, scoring=f1_scorer)
