@@ -5,12 +5,14 @@ import time
 import os
 import numpy as np
 import matplotlib.pylab as plt
+import seaborn as sns
 import tensorflow as tf
 
 from sklearn.metrics import f1_score, classification_report, confusion_matrix, make_scorer
 import matplotlib.pyplot as plt
 import keras.backend as K
 
+from keras.models import model_from_json
 from keras.models import Sequential
 from keras.layers.convolutional import Conv2D, ZeroPadding2D
 from keras.layers.pooling import MaxPooling2D, GlobalAveragePooling2D
@@ -55,7 +57,6 @@ train_idx = perm[-train_size:]
 
 def pop(self):
     '''Removes a layer instance on top of the layer stack.
-    Credit: joelthchao, https://github.com/fchollet/keras/issues/2371
     '''
     if not self.outputs:
         raise Exception('Sequential model cannot be popped: model is empty.')
@@ -109,7 +110,6 @@ def save_bottleneck_features(data, data_size, data_idx):
 	t1 = time.time()
 	print 'Computing %s bottleneck features took %.2f mins.' %(data, round((t1-t0)/60., 2))
 
-# define a f1 score metric
 def fmeasure(y_true, y_pred):
     """According to the keras version 1.2.0 metrics source code, a custom f1 score metric
     is built here. The link for source code:
@@ -128,7 +128,6 @@ def fmeasure(y_true, y_pred):
     
     return fbeta_score
     
-
 # define a function to train the layers on top of the bottleneck features
 def Top_FCN_Model(optimizer='sgd', init='glorot_uniform'):
 
@@ -153,48 +152,41 @@ def Top_FCN_Model(optimizer='sgd', init='glorot_uniform'):
 	model.compile(loss='categorical_crossentropy', optimizer=optimizer, metrics=[fmeasure])
 	return model
 
-# define a grid search function that take model object as input
+
 def Grid_Search_Training(model):
     
     f1_scorer = make_scorer(f1_score, average='weighted')
     optimizers = ['sgd', 'rmsprop', 'adam']
     init = ['glorot_uniform', 'glorot_normal', 'uniform']
-    epochs = [1, 20, 30]
+    epochs = [10, 20, 30]
     batches = [32, 64, 128]
     param_grid = dict(optimizer=optimizers, epochs=epochs, batch_size = batches, init = init)
     grid = GridSearchCV(estimator=model, param_grid=param_grid, cv=4, scoring=f1_scorer)
     
     return grid
 
-# assign a name for the h5 file that stores model weights
 top_model_weights_path = 'Top_FCN_Model_weights.h5'
 
 def load_train_val_data():
-    """Load train and validation bottleneck features
-    """
     train_data   = np.load(open('bottleneck_features_256_144_train.npy'))
-    train_labels = to_categorical(y[train_idx])
-    # train_labels = y[train_idx]
+    # train_labels = to_categorical(y[train_idx])
+    train_labels = y[train_idx]
 
     validation_data   = np.load(open('bottleneck_features_256_144_validation.npy'))
-    validation_labels = to_categorical(y[val_idx])
-    # validation_labels = y[val_idx]
+    # validation_labels = to_categorical(y[val_idx])
+    validation_labels = y[val_idx]
     return train_data, train_labels, validation_data, validation_labels
 
 def load_test_data():
-    """Load test bottleneck features
-    """
     test_data = np.load(open('bottleneck_features_256_144_test.npy'))
     return test_data
 
 def run():
-    """This funtion loads train and validation data, and starts training process.
-    """
 	train_data, train_labels, validation_data, validation_labels = load_train_val_data()
 	X = np.concatenate((train_data, validation_data), axis=0)
 	y = np.concatenate((train_labels, validation_labels), axis=0)
-	# print np.shape(X)
-	# print np.shape(y)
+	print np.shape(X)
+	print np.shape(y)
 	print 'Loaded train and validation data!'
 
 	# create a model
@@ -213,7 +205,6 @@ def run():
 	# checkpointer = ModelCheckpoint(top_model_weights_path, verbose=1, save_best_only=True)
 	grid_result = grid.fit(X, y)
 	print("Best: %f using %s" % (grid_result.best_score_, grid_result.best_params_))
-
 	
 if os.path.isfile('bottleneck_features_256_144_train.npy') and os.path.isfile('bottleneck_features_256_144_validation.npy'):
 	print 'Bottleneck features for training and validation datasets exist!'
@@ -223,6 +214,11 @@ else:
 	print 'Computing bottleneck features for train and validation dataset...'
 	save_bottleneck_features('train', train_size, train_idx)
 	save_bottleneck_features('validation', val_size, val_idx)
+	'''
+	checkpointer = ModelCheckpoint(top_model_weights_path, verbose=1, save_best_only=True)
+	history = model.fit(train_data, train_labels, epochs=epochs, batch_size=batch_size,
+					validation_data = (validation_data, validation_labels), callbacks=[checkpointer])
+	'''
 	run()
 	
 
@@ -232,21 +228,28 @@ if os.path.isfile('bottleneck_features_256_144_test.npy') :
 	print 'Bottleneck features for test dataset exist!'
 	print 'Loaded test data!'
 	test_data = load_test_data()
+	
+	# load json and create model
+	json_file = open('Top_FCN_Model.json', 'r')
+	loaded_model_json = json_file.read()
+	json_file.close()
+	loaded_model = model_from_json(loaded_model_json)
+	
 	print 'Computing predictions on test dataset...'
-	model.load_weights(top_model_weights_path)
-	pred_prop = model.predict(test_data)
-	y_pred = model.predict_classes(test_data)
+	loaded_model.load_weights(top_model_weights_path)
+	pred_prop = loaded_model.predict(test_data)
+	y_pred = loaded_model.predict_classes(test_data)
 	
 else:
 	print 'Computing bottleneck features test dataset...'
 	save_bottleneck_features('test', test_size, test_idx)
 	print 'Computing predictions on test dataset...'
-	model.load_weights(top_model_weights_path)
-	pred_prop = model.predict(test_data)
-	y_pred = model.predict_classes(test_data)	
-	
+	loaded_model.load_weights(top_model_weights_path)
+	pred_prop = loaded_model.predict(test_data)
+	y_pred = loaded_model.predict_classes(test_data)
+
 y_test = y[test_idx]
-# print pred_prop[:2]
+
 print "The first 20 ground truth labels:"
 print y_test[:20]
 print "The first 20 predicted labelS:"
@@ -256,5 +259,26 @@ print "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~"
 # confusion matrix
 labels = ['ALB(0)', 'BET(1)', 'DOL(2)', 'LAG(3)', 'NoF(4)', 'OTHER(5)', 'SHARK(6)', 'YFT(7)']
 print classification_report(y_test, y_pred, target_names=labels)
-print confusion_matrix(y_test, y_pred)
+cm = confusion_matrix(y_test, y_pred)
+print cm
+fig, ax = plt.subplots(figsize=(8,10))
+# Plotting out the confusion matrix on test dataset.
+ax = sns.heatmap(cm, annot=True, fmt='d', cmap='YlGnBu', square=True, xticklabels = labels, yticklabels=labels)
 
+# summarize history for f1 score on train and val datasets.
+plt.plot(history.history['fmeasure'])
+plt.plot(history.history['val_fmeasure'])
+plt.title('model fmeasure')
+plt.ylabel('fmeasure')
+plt.xlabel('epoch')
+plt.legend(['train', 'val'], loc='upper left')
+plt.show()
+
+# summarize history for loss on train and val datasets.
+plt.plot(history.history['loss'])
+plt.plot(history.history['val_loss'])
+plt.title('Model loss')
+plt.ylabel('loss')
+plt.xlabel('epoch')
+plt.legend(['train', 'val'], loc='upper left')
+plt.show()
