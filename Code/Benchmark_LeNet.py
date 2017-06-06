@@ -58,44 +58,11 @@ X_train = X[train_idx]/255.
 X_val   = X[val_idx]/255.
 X_test  = X[test_idx]/255.
 
-# print np.shape(X_train)
-# plt.imshow(X_train[0])
-# plt.show()
-
-
-# compute the mean of training dataset
-# X_train_mean = np.mean(X_train)
-
-# subtract the mean from all pixels, using the training dataset statistics
-# X_train = X_train /255.
-# X_test  = X_test / 255.
-# X_train = X_train - X_train_mean
-# X_test  = X_test - X_train_mean
-
-# def normalize(X):
-# 	"""
-# 	X: in shape of (nb_samples, height, width, channel)
-# 	
-# 	it returns X = (X-np.mean(X, axis=0))/np.std(X-np.mean(X, axis=0))
-# 	"""
-# 	# reshape X into (N, D), is the nb_samples, D = dimensionality
-# 	X_2D = X.reshape(len(X), -1)
-# 	X_2D_mean = np.mean(X_2D, axis=0)
-# 	X_2D_centered = X_2D - X_2D_mean
-# 	X_2D_std = np.std(X_2D_centered, axis=0)
-# 	X_2D_normalized = X_2D_centered/X_2D_std
-# 	X_normalized = X_2D_normalized.reshape(len(X), 128, 128, 3)
-# 	
-# 	return X_normalized, X_2D_mean, X_2D_std
-# 
-# X_train, X_train_2D_mean, X_train_2D_std = normalize(X_train)
-# 
-# X_test = ((X_test.reshape(len(X_test), -1) - X_train_2D_mean)/X_train_2D_std).reshape(len(X_test), 128, 128, 3)
-
-# one hot encode labels
+# one hot encode train and validation set labels
 y_label = to_categorical(y)
 y_train = y_label[train_idx]
 y_val   = y_label[val_idx]
+
 y_test  = y[test_idx]
 
 
