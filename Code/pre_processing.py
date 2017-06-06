@@ -21,6 +21,8 @@ labels      = LE.transform(classes)
 fish_labels = dict(zip(classes, labels))
 print fish_labels
 
+new_img_size = (256, 144)
+
 def preprocessing(fish_class):
 
 	"""preprocess images by resize the images to smaller ones;
@@ -51,9 +53,9 @@ def preprocessing(fish_class):
 		img = cv2.imread(img_handle)
 		
 		# resize it 
-		# cv2.resize( img, (new_img_width, new_img_height)
-		# img = cv2.resize(img, (256,144), interpolation=cv2.INTER_CUBIC)
-		# store the img in format of np.ndarray into the imgs 
+		cv2.resize( img, (new_img_width, new_img_height)
+		img = cv2.resize(img, new_img_size, interpolation=cv2.INTER_CUBIC)
+		store the img in format of np.ndarray into the imgs 
 		imgs.append(img)
 		
 		# store a label in labels
@@ -91,7 +93,7 @@ print '----------------------------------------------------------------------'
 
 print 'Saving Preprocessed imgs and corresponding labels into HDF5 format...'
 # Save preprocessed data as hdf5 format
-filename = 'Preprocessed_Aug_Dataset_256_144.h5'
+filename = 'Preprocessed_Aug_Dataset_%s_%s.h5' %new_img_size
 with h5py.File(filename, 'w') as w_hf:
 	w_hf.create_dataset("preprocessed_data",  data=preprocessed_data_list)
 	w_hf.create_dataset('label', data=label_list)
