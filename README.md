@@ -1,3 +1,17 @@
+The project is implemented using Python 2.7.12
+
+## All modules are used:
+cv2, version: 2.4.8
+h5py, version 2.6.0
+tables, version 3.2.2
+numpy, version 1.12.1
+seaborn, version 0.7.1
+tensorflow, version 1.1.0
+sklearn, version 0.18.1
+matplotlib 1..5.1
+keras 2.0.4
+
+
 # Nature-Conservancy-Fisheries-Monitoring
 I use the kaggle competition 'Nature Conservancy Fisheries Monitoring' as Capstone Project of Udacity ML Nanodegree
 
