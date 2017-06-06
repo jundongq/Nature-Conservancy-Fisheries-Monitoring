@@ -7,7 +7,7 @@ import glob
 from random import randint
 from sklearn.preprocessing import LabelEncoder
 
-# data directory, which stores the original dataset
+# data directory, which stores the augmented dataset
 data_dir = 'Data/train_aug_256_144/'
 
 # data in 8 folders with names of classes, return names of classes without considering
@@ -19,9 +19,9 @@ LE = LabelEncoder()
 LE.fit(classes)
 labels      = LE.transform(classes)
 fish_labels = dict(zip(classes, labels))
-print fish_labels
+# print fish_labels
 
-new_img_size = (256, 144)
+new_img_size = (256, 144) # or (64, 36)
 
 def preprocessing(fish_class):
 
