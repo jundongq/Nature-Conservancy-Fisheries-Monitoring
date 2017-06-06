@@ -91,7 +91,8 @@ print '----------------------------------------------------------------------'
 
 print 'Saving Preprocessed imgs and corresponding labels into HDF5 format...'
 # Save preprocessed data as hdf5 format
-with h5py.File('Preprocessed_Original_Dataset_360h_640w.h5', 'w') as w_hf:
+filename = 'Preprocessed_Aug_Dataset_256_144.h5'
+with h5py.File(filename, 'w') as w_hf:
 	w_hf.create_dataset("preprocessed_data",  data=preprocessed_data_list)
 	w_hf.create_dataset('label', data=label_list)
 print 'Saving Completed!'
